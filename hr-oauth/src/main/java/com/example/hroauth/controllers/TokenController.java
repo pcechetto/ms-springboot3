@@ -1,6 +1,8 @@
 package com.example.hroauth.controllers;
 
 import java.time.Instant;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.hroauth.controllers.dto.LoginRequest;
 import com.example.hroauth.controllers.dto.LoginResponse;
+import com.example.hroauth.entities.Role;
 import com.example.hroauth.services.UserService;
 
 @RestController
@@ -41,11 +44,13 @@ public class TokenController {
         var expiresIn = 300L;
 
         var claims = JwtClaimsSet.builder()
-            .issuer("mybackend")
-            .subject(user.getEmail())
-            .issuedAt(now)
-            .expiresAt(now.plusSeconds(expiresIn))
-            .build();
+        .subject(user.getEmail())
+        .issuedAt(now)
+        .expiresAt(now.plusSeconds(expiresIn))
+        .claim("user_name", user.getEmail())
+        .claim("authorities", user.getRoles().stream().map(Role::getRoleName).collect(Collectors.toList()))
+        .claim("jti", UUID.randomUUID().toString())
+        .build();
 
         var jwtValue = jwteEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
 
