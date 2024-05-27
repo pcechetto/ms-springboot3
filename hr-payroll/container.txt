@@ -1,0 +1,5 @@
+mvnw clean package -DskipTests
+
+docker build -t hr-payroll:v1 .
+
+docker run -P --network hr-net hr-payroll:v1
